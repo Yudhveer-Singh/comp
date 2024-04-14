@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#b64fc8">
+  <title>Tic Tac Toe Game</title>
+  <!-- Materialize CSS -->
+  <link rel="stylesheet" href="materialize_min.css">
+  <!-- jQuery -->
+  <script src="jquery.min.js"></script>
+  <!-- Materialize JS -->
+  <script src="materialize.min.js"></script>
+  <style>
+    :root{
+  /*blue*/
+  /*--body_back: #eef2ff;
+  --main_color: #64c1ff;
+  --main_light: #aae8ff;
+  --header: #0091ea;
+  --main_dark: #0064b7;
+  --badge: var(--header);*/
+  /*red*/
+  /*--body_back: #ffedef;
+  --main_color: #f3989b;
+  --main_light: #f8c1c3;
+  --header: #d0181e;
+  --main_dark: #8b1014;
+  --badge: var(--header);*/
+  /*orange*/
+  /*--body_back: #FFF4E9;
+  --main_color: #FFB069;
+  --main_light: #FFCEA3;
+  --header: #DF6900;
+  --main_dark: #9D4A01;
+  --badge: var(--header);*/
+  /*purple*/
+  --body_back: #ffe8ff;
+  --main_color: #ec97f9;
+  --main_light:#ffb2ff;
+  --header: #b64fc8;
+  --main_dark: #863896;
+  --badge: var(--header);
+}
+    body{
+      background: var(--body_back); 
+    }
+    .btni{
+      background: var(--header);
+      color: white;
+      padding:14px 18px 14px 18px;
+      border:none;
+      border-radius: 22px;
+      transition-duration: 1s;
+    }
+    .btni:hover{
+      background: var(--header);
+      border-radius: 4px;
+    }
+    #gameBoard { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 20px;}
+    .cell { height: 100px; border: 2px solid var(--body_back); display: flex; justify-content: center; align-items: center; font-size: 2em; cursor: pointer; color: var(--main_dark) ;}
+    .disabled { pointer-events: none; opacity: 0.6; }
+    .hidden { display: none; }
+    .atoast{
+      z-index: 14;
+      position: fixed;
+      bottom:8px;
+      width: 100%;
+      display:flex;
+      justify-content: center;
+      transition-duration: 2s;
+    }
+    .atoast .tos{
+      background: var(--body_back);
+      padding:10px 24px;
+      font-size: 16px;
+      border-radius: 40px;
+      box-shadow:0 10px 50px rgba(0,0,0,0.15);
+    }
+    .popup{
+  position:fixed;
+  z-index: 12;
+  width: fit-content;
+  min-width: 180px;
+  max-width: 300px;
+  box-shadow: 0px 10px 50px rgba(0,0,0,0.15);
+  background: var(--main_light);
+  padding: 24px 16px 16px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  margin: 8px;
+  bottom: 40px;
+  animation: pop 0.2s ease-in-out 0s normal;
+}
+@keyframes pop{
+  from{
+    filter: opacity(0);
+  }
+  to{
+    filter: opacity(1);
+  }
+}
+.popup:before{
+  content:"message";
+  width: fit-content;
+  padding:4px 16px 4px 12px;
+  background: var(--main_dark);
+  color:var(--body_back);
+  border-radius: 4px;
+  box-shadow: 0 10px 50px rgba(0,0,0,0.15);
+  top:-12px;
+  left:12px;
+  position: absolute;
+}
+.popup_close{
+  content: "";
+  color:var(--body_back);
+  display:flex;
+  justify-content: center;
+  position: absolute;
+  width:22px;
+  height:22px;
+  background:var(--main_dark) url("cross.svg");
+  right:-8px;
+  top:-8px;
+  border-radius:4px;
+}
+.k1{
+  border-radius: 8px 0 0 0;
+}
+.k2{
+  border-radius: 0 8px 0 0;
+}
+.k3{
+  border-radius: 0 0 8px 0;
+}
+.k4{
+  border-radius: 0 0 0 8px;
+}
+.k5{
+  border-color: var(--badge);
+}
+.ku,.kd{
+  border-right-color: var(--badge);
+  border-left-color: var(--badge);
+}
+.kl,.kr{
+  border-top-color: var(--badge);
+  border-bottom-color: var(--badge);
+}
+h3{
+  color: var(--main_dark);
+}
+  </style>
+</head>
+<body class="iblue-grey idarken">
+
+  <div class="container">
+    <h3 class="center-align">Tic Tac Toe</h3>
+    <div class="center-align">
+      <a class="waves-effect waves-light kbtn btni" id="singlePlayerButton">Single Player</a>
+      <a class="waves-effect waves-light kbtn btni" id="twoPlayerButton">Two Player</a>
+    </div>
+    <div id="gameBoard" class="center-align hidden">
+      <div class="cell waves-effect waves-light k1"></div>
+      <div class="cell waves-effect waves-light ku"></div>
+      <div class="cell waves-effect waves-light k2"></div>
+      <div class="cell waves-effect waves-light kl"></div>
+      <div class="cell waves-effect waves-light k5"></div>
+      <div class="cell waves-effect waves-light kr"></div>
+      <div class="cell waves-effect waves-light k4"></div>
+      <div class="cell waves-effect waves-light kd"></div>
+      <div class="cell waves-effect waves-light k3"></div>
+    </div>
+    <br />
+    <div class="center-align" id="resetDiv">
+      <a class="waves-effect waves-light btni" id="resetButton">Reset</a>
+    </div>
+  </div>
+
+  <script>
+    //$('.cell').width();
+    $(document).ready(function() {
+      var board = ['', '', '', '', '', '', '', '', ''];
+      var currentPlayer = 'X';
+      var gameOver = false;
+      var singlePlayer = true;
+
+      $('#singlePlayerButton').click(function() {
+        singlePlayer = true;
+        startGame();
+      });
+
+      $('#twoPlayerButton').click(function() {
+        singlePlayer = false;
+        startGame();
+      });
+
+      function startGame() {
+        //$('#singlePlayerButton').addClass('hidden');
+        //$('#twoPlayerButton').addClass('hidden');
+        $('#gameBoard').removeClass('hidden');
+        //$('#resetDiv').removeClass('hidden');
+        resetBoard();
+      }
+
+      $('.cell').click(function() {
+        var cellIndex = $('.cell').index(this);
+        if (board[cellIndex] === '' && !gameOver) {
+          makeMove(cellIndex);
+          if (singlePlayer && currentPlayer === 'O' && !gameOver) {
+            aiMove();
+          }
+        }
+      });
+
+      $('#resetButton').click(function() {
+        resetBoard();
+      });
+
+      function resetBoard() {
+        board = ['', '', '', '', '', '', '', '', ''];
+        $('.cell').text('');
+        $('.cell').removeClass('disabled');
+        currentPlayer = 'X';
+        gameOver = false;
+        $(".popup").css({
+      "display":"none"
+    });
+      }
+
+      function makeMove(index) {
+        $(".popup").css({
+          "display":"none"
+        });
+        board[index] = currentPlayer;
+        $('.cell').eq(index).text(currentPlayer);
+        $('.cell').eq(index).addClass('disabled');
+        if (checkWinner()) {
+          //M.toast({html: currentPlayer + ' wins!'});
+          //toast(currentPlayer+" Wins!!",3000);
+          pop(currentPlayer+" wins!!")
+          gameOver = true;
+        } else if (isBoardFull()) {
+          //M.toast({html: 'Draw!'});
+          //toast("Draw!!",3000);
+          pop("Draw!!");
+          gameOver = true;
+        } else {
+          currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        }
+      }
+
+      function aiMove() {
+        // Simple AI to make a random move
+        var emptyIndices = board.map((cell, index) => cell === '' ? index : null).filter(index => index !== null);
+        var randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        makeMove(randomIndex);
+      }
+
+      function checkWinner() {
+        var winCombinations = [
+          [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+          [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+          [0, 4, 8], [2, 4, 6]            // Diagonals
+        ];
+        for (var i = 0; i < winCombinations.length; i++) {
+          var [a, b, c] = winCombinations[i];
+          if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function isBoardFull() {
+        return board.every(cell => cell);
+      }
+    });
+    function toast(msg,toast_duration){
+      $(".atoast").empty();
+      $("body").prepend($('<div></div>').attr("class","atoast"));
+      $(".atoast").append($('<div></div>').attr("class","tos").html(msg));
+      setTimeout(function(){
+        $(".atoast").empty();
+      },toast_duration);
+    }
+    //toast("welcome!!",3000);
+    function pop(message){
+  $("body").append($('<div></div>').attr("class","popup").html(message));
+  $(".popup").append($('<div></div>').attr("class","popup_close"));
+  $(".popup_close").click(function(){
+    $(".popup").css({
+      "display":"none"
+    });
+  });
+}
+    pop("I hope you enjoy playing... ");
+  </script>
+
+</body>
+</html>
